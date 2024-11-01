@@ -12,9 +12,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.Arm.Presets;
-import frc.robot.subsystems.Intake.IntakeMode;
-import frc.robot.subsystems.Shooter.ShooterMode;
 import frc.robot.subsystems.SwerveSubsystem.RotationStyle;
 
 import java.util.function.BooleanSupplier;
@@ -56,27 +53,10 @@ public class RobotContainer {
     // private final LimeLightSubsystem limeLightSubsystem = new
     // LimeLightSubsystem();
 
-    private final Targeting targeting = new Targeting(swerveDriveSubsystem);
-
-    private final StageOne stageOne = new StageOne();
-    private final StageTwo stageTwo = new StageTwo();
-
-    private final Intake intake = new Intake(driverXbox, operatorXbox);
-    private final Shooter shooter = new Shooter();
-    private final Arm arm = new Arm(stageOne, stageTwo, shooter, targeting, operatorXbox.getHID());
-
     private final UsbCamera intakeCam = CameraServer.startAutomaticCapture();
-    private final DriveCommand normalDrive = new DriveCommand(swerveDriveSubsystem, driverXbox.getHID(), targeting,
-            arm);
+    private final DriveCommand normalDrive = new DriveCommand(swerveDriveSubsystem, driverXbox.getHID());
 
-    private final LEDstripOne m_stripOne = new LEDstripOne(9, intake, shooter, arm, swerveDriveSubsystem, normalDrive);
-
-    // ----------- Commands ---------- \\
-
-    private final ClimberSubsystem climber = new ClimberSubsystem(swerveDriveSubsystem.navX);
-    private final ClimberCommand climberCommand = new ClimberCommand(climber, operatorXbox.getHID());
-
-    /**
+/* 
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
@@ -84,81 +64,6 @@ public class RobotContainer {
         configureBindings();
 
         // DataLogManager.logNetworkTables(true);
-
-        NamedCommands.registerCommand("Shoot Close", new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    arm.setArmPreset(Presets.SHOOT_LOW);
-                }),
-                new InstantCommand(() -> {
-                    swerveDriveSubsystem.setRotationStyle(RotationStyle.AutoSpeaker);
-                })));
-        NamedCommands.registerCommand("Shoot TM", new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    arm.setArmPreset(Presets.SHOOT_HIGH);
-                })));
-        NamedCommands.registerCommand("Shoot AMP", new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    arm.setArmPreset(Presets.AUTO_AMP);
-                })));
-        NamedCommands.registerCommand("Shoot", new SequentialCommandGroup(
-                new WaitUntilCommand(new BooleanSupplier() {
-                    @Override
-                    public boolean getAsBoolean() {
-                        return shooter.isUpToSpeed();
-                    }
-                }),
-                new ShootCommand(shooter, intake),
-                new InstantCommand(() -> {
-                    swerveDriveSubsystem.setRotationStyle(RotationStyle.Driver);
-                })));
-        NamedCommands.registerCommand("Spool", new SequentialCommandGroup(
-                new AlignNoteCommand(intake, shooter),
-                new PrepNoteCommand(intake),
-                new PrepShooterCommand(shooter, 0.8)));
-        NamedCommands.registerCommand("SpoolAMP", new SequentialCommandGroup(
-                new AlignNoteCommand(intake, shooter),
-                new PrepNoteCommand(intake),
-                new PrepShooterCommand(shooter, 0.5)));
-        NamedCommands.registerCommand("Intaking", new SequentialCommandGroup(
-                new AutoIntakeCommand(intake, 3.0)));
-        NamedCommands.registerCommand("Intaking2", new SequentialCommandGroup(
-                new AutoIntakeCommand(intake, 2.0)));
-        NamedCommands.registerCommand("Intaking 5", new SequentialCommandGroup(
-                new AutoIntakeCommand(intake, 10)));
-        NamedCommands.registerCommand("Pickup",
-                new InstantCommand(() -> {
-                    arm.setArmPreset(Presets.INTAKE);
-                }));
-        NamedCommands.registerCommand("Stow", new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    arm.setArmPreset(Presets.STOW);
-                })));
-
-        NamedCommands.registerCommand("StartBoth", new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    shooter.setCustomPercent(0.7);
-                    intake.setMode(IntakeMode.INTAKING);
-                    intake.setShooterLimitEnabled(false);
-                })));
-
-        NamedCommands.registerCommand("StopBoth", new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    shooter.setMode(ShooterMode.STOPPED);
-                    intake.setMode(IntakeMode.STOPPED);
-                })));
-
-
-
-        NamedCommands.registerCommand("NoNote", new SequentialCommandGroup(
-        new WaitCommand(.4),
-        new WaitUntilCommand(new BooleanSupplier() {
-            public boolean getAsBoolean() {
-                return !intake.containsNote().getAsBoolean();
-            }
-        })
-        ));
-
-
 
         // NamedCommands.registerCommand("NoNote", new (
         //     new WaitForCommand(1.0),
@@ -198,15 +103,9 @@ public class RobotContainer {
         // );
 
         autoChooser = AutoBuilder.buildAutoChooser();
-        autoChooser.onChange(new Consumer<Command>() {
-        public void accept(Command t) {
-        m_stripOne.updateAutoStartPosition(autoChooser.getSelected().getName());
-        };
-        });
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         swerveDriveSubsystem.setDefaultCommand(normalDrive);
-        climber.setDefaultCommand(climberCommand);
     }
 
     // Command shootAction =
@@ -239,176 +138,14 @@ public class RobotContainer {
         // }));
 
         // Stow intake/shooter
-        operatorXbox.b().onTrue(new InstantCommand(() -> {
-            arm.setArmPreset(Presets.STOW);
-        }));
-
-        // Intake/intake shooter
-        operatorXbox.a().onTrue(new InstantCommand(() -> {
-            arm.setArmPreset(Presets.INTAKE);
-        }));
-
-        // Low shoot preset
-        operatorXbox.x().onTrue(new InstantCommand(() -> {
-            arm.setArmPreset(Presets.SHOOT_LOW);
-        }));
-
-        // operatorXbox.povLeft().onTrue(new InstantCommand(() -> {
-        // arm.setArmPreset(Presets.TRAP);
-        // }));
-
-        // Amp preset
-        operatorXbox.y().onTrue(new InstantCommand(() -> {
-            arm.setArmPreset(Presets.AMP);
-        }));
-
-        operatorXbox.button(10).onTrue(new InstantCommand(() -> {
-            arm.setArmPreset(Presets.SHOOT_MANUAL);
-        }));
-
-        operatorXbox.button(9).onTrue(new InstantCommand(() -> {
-            arm.setArmPreset(Presets.SHOOT_SHUTTLE);
-        }));
-
-        // High shoot preset
-        operatorXbox.rightTrigger().and(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                // TODO Auto-generated method stub
-                return operatorXbox.getRightTriggerAxis() > 0.1;
-            }
-        }).onTrue(new InstantCommand(() -> {
-            arm.setArmPreset(Presets.SHOOT_HIGH);
-        }));
-
-        
-        // intake preset on climber start
-        operatorXbox.povUp().onTrue(new InstantCommand(() -> {
-        arm.setArmPreset(Presets.STOW);
-        }));
-
-        // set arm to intake, once has happened, retract the arm and center the note
-        // operatorXbox.leftBumper().onTrue(
-        // new SequentialCommandGroup(
-        // new InstantCommand(() -> {
-        // arm.setArmPreset(Presets.INTAKE);
-        // })))
-        // .whileTrue(new SequentialCommandGroup(
-        // new IntakeCommand(intake)).andThen(new ParallelCommandGroup(new
-        // InstantCommand(() -> {
-        // arm.setArmPreset(Presets.STOW);
-        // }),new AlignNoteCommand(intake, shooter))));
-
-        operatorXbox.leftBumper().onTrue(new SequentialCommandGroup(
-                new ConditionalCommand(
-                        new InstantCommand(() -> {
-                            arm.setArmPreset(Presets.STOW);
-                        }),
-                        new InstantCommand(() -> {
-                            arm.setArmPreset(Presets.INTAKE);
-                        }),
-                        intake.containsNote())))
-                .whileTrue(new IntakeCommand(intake).andThen(new AlignNoteCommand(intake, shooter))
-                        .andThen(new InstantCommand(() -> {
-                            arm.setArmPreset(Presets.STOW);
-                        })))
-                .onFalse(new InstantCommand(() -> {
-                    intake.setMode(IntakeMode.STOPPED);
-                }));
-
-        // Purge/spit command
-        operatorXbox.leftTrigger().and(new BooleanSupplier() {
-            public boolean getAsBoolean() {
-                return operatorXbox.getLeftTriggerAxis() > 0.1;
-            }
-        }).onTrue(new InstantCommand(() -> {
-            intake.setCustomPercent(-operatorXbox.getLeftTriggerAxis());
-            shooter.setCustomPercent(operatorXbox.getLeftTriggerAxis());
-        })).onFalse(new InstantCommand(() -> {
-            intake.setCustomPercent(0.0);
-            shooter.setCustomPercent(0.0);
-        }));
-
-        // source intake
-        operatorXbox.button(7).onTrue(new SequentialCommandGroup(
-                new ConditionalCommand(
-                        new InstantCommand(() -> {
-                            arm.setArmPreset(Presets.STOW);
-                        }),
-                        new InstantCommand(() -> {
-                            arm.setArmPreset(Presets.SOURCE);
-                        }),
-                        intake.containsNote())))
-                .whileTrue(new IntakeCommand(intake).andThen(new AlignNoteCommand(intake, shooter))
-                        .andThen(new InstantCommand(() -> {
-                            arm.setArmPreset(Presets.STOW);
-                        })))
-                .onFalse(new InstantCommand(() -> {
-                    intake.setMode(IntakeMode.STOPPED);
-                }));
-
-        // Prepare shooting command
-        operatorXbox.rightBumper().and(new BooleanSupplier() {
-            public boolean getAsBoolean() {
-                // note in shootake
-                return intake.getIntakeSideLimitClosed() || intake.getShooterSideLimitClosed();
-            }
-        }).onTrue(new SequentialCommandGroup(
-                new AlignNoteCommand(intake, shooter),
-                new ParallelCommandGroup(
-                        new PrepNoteCommand(intake),
-                        new SequentialCommandGroup(
-                                new WaitCommand(0.1),
-                                new PrepShooterCommand(shooter, arm))))
-                .raceWith(new WaitUntilCommand(operatorXbox.rightBumper().negate())))
-                .onFalse(new SequentialCommandGroup(
-                        new InstantCommand(() -> {
-                            shooter.setMode(ShooterMode.STOPPED);
-                        }),
-                        new WaitUntilCommand(new BooleanSupplier() {
-                            @Override
-                            public boolean getAsBoolean() {
-                                return shooter.isStopped();
-                            }
-                        }),
-                        new AlignNoteCommand(intake, shooter)));
-                        
-        // operatorXbox.rightBumper().onFalse(new ConditionalCommand(new SequentialCommandGroup(new ShootCommand(shooter, intake).deadlineWith(new WaitUntilCommand(1.5)), new InstantCommand(() -> {shooter.stop();})), new PrintCommand(""), new BooleanSupplier() {
-        //         @Override
-        //         public boolean getAsBoolean() {
-        //             return arm.getCurrentPreset() == Presets.SHOOT_SHUTTLE;
-        //         }
-        //     }));
-
-        // Operator shoots for shuttle
-        operatorXbox.rightBumper().negate().and(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                // TODO Auto-generated method stub
-                return arm.getCurrentPreset() == Presets.SHOOT_SHUTTLE;
-            }
-        }).onTrue(new ConditionalCommand(new ShootCommand(shooter, intake).andThen(new InstantCommand(() -> {shooter.stop();})), new InstantCommand(), new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                // TODO Auto-generated method stub
-                return !intake.getShooterSideLimitClosed();
-            }
-        }));
-        
-
-        // Recal climber
-        operatorXbox.button(8).onTrue(new InstantCommand(() -> {
-            climber.leftArm.is_calibrated = false;
-            climber.rightArm.is_calibrated = false;
-        }));
 
         // Driver trigger shoot
-        driverXbox.leftTrigger().and(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                return driverXbox.getLeftTriggerAxis() > 0.25 && shooter.isUpToSpeed();
-            }
-        }).onTrue(new ShootCommand(shooter, intake).deadlineWith(new WaitCommand(1.0)));
+        // driverXbox.leftTrigger().and(new BooleanSupplier() {
+        //     @Override
+        //     public boolean getAsBoolean() {
+        //         return driverXbox.getLeftTriggerAxis() > 0.25 && shooter.isUpToSpeed();
+        //     }
+        // }).onTrue(new ShootCommand(shooter, intake).deadlineWith(new WaitCommand(1.0)));
 
         driverXbox.a().onTrue(new InstantCommand(() -> {
             swerveDriveSubsystem.setRotationStyle(RotationStyle.AutoSpeaker);
@@ -422,13 +159,6 @@ public class RobotContainer {
             swerveDriveSubsystem.setRotationStyle(RotationStyle.Driver);
         }));
 
-        // SOFT RESET
-        driverXbox.button(7).onTrue(new InstantCommand(() -> {
-            arm.hardwareInit();
-            shooter.hardwareInit();
-            intake.hardwareInit();
-            climber.hardwareInit();
-        }));
 
         // // Fine tune on stage 2
 
@@ -442,11 +172,6 @@ public class RobotContainer {
         // arm.setCustomGoal(arm.getStageOneDegrees(), arm.getStageTwoDegrees() +
         // (operatorXbox.getLeftY() * ArmConstants.HUMAN_ARM_INPUT_P));
         // }));
-    }
-
-    public void resetShootake() {
-        shooter.setMode(ShooterMode.STOPPED);
-        intake.setMode(IntakeMode.STOPPED);
     }
 
     /**

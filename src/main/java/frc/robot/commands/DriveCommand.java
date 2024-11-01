@@ -2,8 +2,6 @@ package frc.robot.commands;
 
 import org.opencv.core.RotatedRect;
 
-import com.pathplanner.lib.util.GeometryUtil;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -16,18 +14,13 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Targeting;
 import frc.robot.Constants.*;
-import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Arm.Presets;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.SwerveSubsystem.RotationStyle;
 
 public class DriveCommand extends Command {
     private final SwerveSubsystem swerveSubsystem;
-    private final Targeting targeting;
     private final XboxController xbox;
-    private final Arm arm;
 
     private SlewRateLimiter dsratelimiter = new SlewRateLimiter(4);
 
@@ -44,25 +37,15 @@ public class DriveCommand extends Command {
 
     private DriveState state = DriveState.Free;
 
-    public DriveCommand(SwerveSubsystem swerveSubsystem, XboxController xbox, Targeting targeting, Arm arm) {
+    public DriveCommand(SwerveSubsystem swerveSubsystem, XboxController xbox) {
         this.swerveSubsystem = swerveSubsystem;
         this.xbox = xbox;
-        this.targeting = targeting;
-        this.arm = arm;
 
         rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
         dsratelimiter.reset(SLOWMODE_MULT);
 
         addRequirements(swerveSubsystem);
-    }
-
-    public boolean isSpeakerAligned() {
-        double botAngle = swerveSubsystem.getPose().getRotation().getRadians() + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0);
-
-        double calculatedAngle = targeting.getPhi(arm.getHorizOffset());
-        // return Math.abs(swerveSubsystem.getHeading() - calculatedAngle) < Units.degreesToRadians(5.0);
-        return Math.abs(botAngle - calculatedAngle) < Units.degreesToRadians(5.0);
     }
 
     double clamp(double v, double mi, double ma) {
@@ -129,33 +112,32 @@ public class DriveCommand extends Command {
 
         ChassisSpeeds speeds;
 
-        double calculatedAngle = targeting.getPhi(arm.getHorizOffset());
 
-        switch (swerveSubsystem.getRotationStyle()) {
-            case Driver:
-                // do nothing special
-                break;
-            case AutoSpeaker:
-                // Rotation2d r =
-                // swerveSubsystem.getPose().getTranslation().minus(FieldConstants.getSpeakerPosition()).getAngle();
-                // if (DriverStation.getAlliance().get() == Alliance.Red)
-                // r = r.rotateBy(new Rotation2d(Math.PI));
-                // double calculatedAngle = targeting.getPhi(arm.getHorizOffset());
-                // SmartDashboard.putNumber("Wanted Heading", calculatedAngle);
-                SmartDashboard.putNumberArray("Phi control", new double[] {
-                        calculatedAngle,
-                        swerveSubsystem.getHeading()
-                });
-                zSpeed = MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians() + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0), calculatedAngle),
-                        -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY);
-                break;
-            case AutoShuttle:
-                double shuttleCalculatedAngle = targeting.getShuttlePhi();
+        // switch (swerveSubsystem.getRotationStyle()) {
+        //     // case Driver:
+        //     //     // do nothing special
+        //     //     break;
+        //     // case AutoSpeaker:
+        //     //     // Rotation2d r =
+        //     //     // swerveSubsystem.getPose().getTranslation().minus(FieldConstants.getSpeakerPosition()).getAngle();
+        //     //     // if (DriverStation.getAlliance().get() == Alliance.Red)
+        //     //     // r = r.rotateBy(new Rotation2d(Math.PI));
+        //     //     // double calculatedAngle = targeting.getPhi(arm.getHorizOffset());
+        //     //     // SmartDashboard.putNumber("Wanted Heading", calculatedAngle);
+        //     //     SmartDashboard.putNumberArray("Phi control", new double[] {
+        //     //             calculatedAngle,
+        //     //             swerveSubsystem.getHeading()
+        //     //     });
+        //     //     zSpeed = MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians() + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0), calculatedAngle),
+        //     //             -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY);
+        //     //     break;
+        //     // case AutoShuttle:
+        //     //     double shuttleCalculatedAngle = targeting.getShuttlePhi();
 
-                zSpeed = MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians() + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0), shuttleCalculatedAngle),
-                        -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY);
-                break;
-        }
+        //     //     zSpeed = MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians() + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0), shuttleCalculatedAngle),
+        //     //             -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY);
+        //     //     break;
+        // }
 
         // Drive Non Field Oriented
         if (xbox.getRightBumper()) {
@@ -196,7 +178,7 @@ public class DriveCommand extends Command {
                 break;
         }
 
-        SmartDashboard.putString("Chassis eeeeeeeeeds", targeting.getBotVelocity().toString());
+        // SmartDashboard.putString("Chassis eeeeeeeeeds", targeting.getBotVelocity().toString());
     }
 
     @Override

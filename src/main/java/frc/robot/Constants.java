@@ -129,7 +129,8 @@ public final class Constants {
 
     // TODO: Change based on actual robot!
     public static final double TRACK_WIDTH = Units.inchesToMeters(19.75);
-    public static final double WHEEL_BASE = Units.inchesToMeters(24.75);
+    public static final double WHEEL_BASE = Units.inchesToMeters(19.75);
+    // TODO: Set this
     public static final Rotation2d NAVX_ANGLE_OFFSET = Rotation2d.fromDegrees(90);
     public static final double DRIVE_BASE_RADIUS = Units.inchesToMeters(15);
 
@@ -154,40 +155,6 @@ public final class Constants {
     public static final boolean LOG_INTO_FILE_ENABLED = false;
   }
 
-  public static class VisionContsants {
-
-    public static final double THETA_kP = 5;
-    public static final double THETA_kI = 0.0;
-    public static final double THETA_kD = 0.08;
-
-    public static final double X_kP = 1.0;
-    public static final double X_kI = 0.0;
-    public static final double X_kD = 0.02;
-
-    public static final double Y_kP = 5;
-    public static final double Y_kI = 0.0;
-    public static final double Y_kD = 0.02;
-  }
-
-  public static class LimelightConstants {
-    public static final String limeLightName = "limelight";
-    public static final Transform3d robotToCamera = new Transform3d(
-        new Translation3d(0.06, -0.2, 0.2127),
-        new Rotation3d(0.0, Units.degreesToRadians(-15.0), Units.degreesToRadians(3.0)));
-    public static final boolean LOG_APRIL_TAGS_INTO_SMARTDASH_BOARD = false;
-  }
-
-  public static class AprilTags {
-    // Blue alliance left or single tags
-    public static final String[] BLUE_ALLIANCE_LEFT_OR_SINGLE_APRILTAGS = { "2", "8", "6", "14", "15", "16" };
-    // Blue alliance right tags
-    public static final String[] BLUE_ALLIANCE_RIGHT_APRILTAGS = { "1", "7" };
-    // Red alliance left or single tags
-    public static final String[] RED_ALLIANCE_LEFT_OR_SINLGE_APRILTAGS = { "10", "4", "5", "11", "12", "13" };
-    // Blue alliance right tags
-    public static final String[] RED_ALLIANCE_RIGHT_APRILTAGS = { "9", "3" };
-  }
-
   public static final class PathPlannerConstants {
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5, 0, 0.2);
     public static final PIDConstants ROTATION_PID = new PIDConstants(5, 0, 0.2);
@@ -198,113 +165,6 @@ public final class Constants {
         DriveConstants.MAX_MODULE_VELOCITY,
         DriveConstants.DRIVE_BASE_RADIUS,
         new ReplanningConfig());
-  }
-
-  public static final class ArmConstants {
-
-    public static final int STAGE_ONE_MOTOR_L = 4;
-
-    public static final int STAGE_ONE_MOTOR_R = 3;
-
-    public static final int STAGE_TWO_MOTOR_PORT = 5;
-
-    public static final int STAGE_ONE_ENCODER_PORT = 11;
-
-    public static final int INTAKE_MOTOR_PORT = 1;
-
-    public static final int SHOOTER_MOTOR_PORT = 2;
-
-    public static final int STAGE_TWO_ENCODER_PORT = 10;
-
-    // Link lengths in inches
-    public static final double STAGE_ONE_LENGTH = 19.7;
-    public static final double STAGE_TWO_LENGTH = 12.0;
-
-    public static final String STAGE_ONE_OFFSET_KEY = "STAGE_ONE_OFFSET";
-    public static final String STAGE_TWO_OFFSET_KEY = "STAGE_TWO_OFFSET";
-
-    public static final double STAGE_ONE_ENCODER_OFFSET = 0.0175;
-
-    public static final double STAGE_TWO_ENCODER_OFFSET = -0.394043 - 0.0685;//0.0675;// try 0.0500?
-
-    public static final double INTAKE_ENCODER_TO_ROT = 10.0 / 18.0;
-
-    public static final ProfiledPIDController STAGE_ONE_PROFILEDPID = new ProfiledPIDController(
-        3,
-        0.0,
-        0.0,
-        new Constraints(3, 3));
-
-    public static final ProfiledPIDController STAGE_TWO_PROFILEDPID = new ProfiledPIDController(
-        12,
-        0.0,
-        0.005,
-        new Constraints(15, 14));
-
-    public static final ArmFeedforward STAGE_ONE_FEEDFORWARD = new ArmFeedforward(
-        0.0,
-        0.18,
-        2.07,
-        0.02);
-
-    public static final ArmFeedforward STAGE_TWO_FEEDFORWARD = new ArmFeedforward(
-        0.0,
-        0.26,
-        1.19,
-        0.0);
-
-    public static final boolean L_STAGE_ONE_ISREVERSED = true;
-    public static final boolean FOLLOWER_STAGE_ONE_ISREVERSED = true;
-    public static final boolean STAGE_TWO_ISREVERSED = true;
-
-    public static final boolean STAGE_ONE_ENCODER_ISREVERSED = true;
-
-    public static final boolean STAGE_TWO_ENCODER_ISREVERSED = false;
-
-    public static final double HUMAN_ARM_INPUT_P = 0.0001;
-
-    // TODO: Retune!!!
-    public static final double SHOOTER_kV = 0.118;
-    public static final double SHOOTER_kP = 0.2;
-    public static final double SHOOTER_kI = 0.075;
-    public static final double SHOOTER_kD = 0.01;
-    public static final double SHOOTER_MAX_RPS = 106.0;
-
-    // FOR TARGETING!!!
-    public static final double MAX_SHOOTER_VELOCITY = 19.0; // 21.5 ok first practice match // 15.0 worked fine on a deadish battery;
-
-    public static final double SHOOTER_LOW_HEIGHT = 0.7;
-    public static final double SHOOTER_LOW_X_OFFSET = 0.36;
-
-    public static final double SHOOTER_HIGH_HEIGHT = 0.96;
-    public static final double SHOOTER_HIGH_X_OFFSET = -0.25;
-
-  }
-
-  public static class ClimberConstants {
-    public static final int LEFT_CLIMBER_CANID = 20;
-    public static final int LEFT_CLIMBER_BRAKE_PWM = 0;
-
-    public static final int RIGHT_CLIMBER_CANID = 30;
-    public static final int RIGHT_CLIMBER_BRAKE_PWM = 1;
-
-    public static final double ROLL_kP = 15.0; // 1.0 is full side rotation;
-    public static final double GOOD_THRESHOLD = 10.0;// Degrees!
-
-    public static final boolean LEFT_CLIMBER_INVERTED = false;
-    public static final boolean RIGHT_CLIMBER_INVERTED = true;
-
-    public static final double SPOOL_RADIUS = 0.5; // CHECK WITH SPIRAL SPOOLING!
-    public static final double SPOOL_CIRC = 2 * Math.PI * SPOOL_RADIUS;
-
-    public static final double CLIMBER_RATIO = 1.0 / 45.0;
-
-    public static final double BRAKE_ENGAGE_POSITION = 0.0f;
-    public static final double BRAKE_DISENGAGE_POSITION = 90.0f;
-
-    public static final double BRAKE_DISENGAGE_TIME = 0.2f;
-
-    public static final double CLIMBER_POS_CONV_FACTOR = CLIMBER_RATIO;
   }
 
   public static final class PoseConstants {
