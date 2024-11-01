@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.*;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -14,10 +17,10 @@ import frc.robot.Robot;
 import frc.robot.Constants.*;
 
 public class SwerveModule {
-    private final CANSparkMax driveMotor;
+    private final TalonFX driveMotor;
     private final CANSparkMax steerMotor;
 
-    private final RelativeEncoder driveMotorEncoder;
+    // private final RelativeEncoder driveMotorEncoder;
     private final RelativeEncoder steerMotorEncoder;
 
     private double driveEncSim = 0;
@@ -38,15 +41,18 @@ public class SwerveModule {
 
     public SwerveModule(int steerCanID, int driveCanID, int absoluteEncoderPort, double motorOffsetRadians,
             boolean isAbsoluteEncoderReversed, boolean motorReversed) {
-        driveMotor = new CANSparkMax(driveCanID, MotorType.kBrushless);
+        // driveMotor = new CANSparkMax(driveCanID, MotorType.kBrushless);
+        driveMotor = new TalonFX(driveCanID);
+        driveMotor.setNeutralMode(NeutralModeValue.Brake);
+
         driveMotor.setInverted(motorReversed);
-        driveMotor.setIdleMode(IdleMode.kBrake);
+        // driveMotor.setIdleMode(IdleMode.kBrake);
         steerMotor = new CANSparkMax(steerCanID, MotorType.kBrushless);
         steerMotor.setIdleMode(IdleMode.kBrake);
         steerMotor.setInverted(false);
 
         this.motor_inv = motorReversed;
-        driveMotorEncoder = driveMotor.getEncoder();
+        // driveMotorEncoder = driveMotor.get();
         steerMotorEncoder = steerMotor.getEncoder();
 
         // Reset encoder offsets possibly set in Tuner X
@@ -60,8 +66,10 @@ public class SwerveModule {
         this.motorOffsetRadians = motorOffsetRadians;
         this.isAbsoluteEncoderReversed = isAbsoluteEncoderReversed;
 
-        driveMotorEncoder.setPositionConversionFactor(SwerveModuleConstants.DRIVE_ROTATION_TO_METER);
-        driveMotorEncoder.setVelocityConversionFactor(SwerveModuleConstants.DRIVE_METERS_PER_MINUTE);
+        // driveMotorEncoder.setPositionConversionFactor(SwerveModuleConstants.DRIVE_ROTATION_TO_METER);
+        // driveMotorEncoder.setVelocityConversionFactor(SwerveModuleConstants.DRIVE_METERS_PER_MINUTE);
+        // TalonFXConfiguration talon_cfg = new TalonFXConfiguration();
+        // driveMotor.getConfigurator().apply(cfg);
 
         steerMotorEncoder.setPositionConversionFactor(SwerveModuleConstants.STEER_ROTATION_TO_RADIANS);
         steerMotorEncoder.setVelocityConversionFactor(SwerveModuleConstants.STEER_RADIANS_PER_MINUTE);
@@ -83,11 +91,14 @@ public class SwerveModule {
     public double getDrivePosition() {
         if (Robot.isSimulation())
             return driveEncSim;
-        return driveMotorEncoder.getPosition();
+        // return driveMotorEncoder.getPosition();
+        // TODO: Do the conversion in the motor
+        return driveMotor.getPosition().getValueAsDouble()* SwerveModuleConstants.DRIVE_ROTATION_TO_METER;
     }
 
     public double getDriveVelocity() {
-        return driveMotorEncoder.getVelocity();
+        // return driveMotorEncoder.getVelocity();
+        return driveMotor.getVelocity().getValueAsDouble() * SwerveModuleConstants.DRIVE_ROTATION_TO_METER;
     }
 
     public double getSteerPosition() {
@@ -108,7 +119,8 @@ public class SwerveModule {
     }
 
     public void resetEncoders() {
-        driveMotorEncoder.setPosition(0);
+        // driveMotorEncoder.setPosition(0);
+        driveMotor.setPosition(0.0);
         steerMotorEncoder.setPosition(getAbsoluteEncoderPosition());
     }
 

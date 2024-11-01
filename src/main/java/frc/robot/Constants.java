@@ -73,7 +73,8 @@ public final class Constants {
   public static class SwerveModuleConstants {
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
     public static final double STEERING_GEAR_RATIO = 1.d / (150d / 7d);
-    public static final double DRIVE_GEAR_RATIO = 1.d / 6.75d;
+    // This is for L2 modules with 16T pinions
+    public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d) * (16.f/14.f);
 
     public static final double DRIVE_ROTATION_TO_METER = DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER;
     public static final double STEER_ROTATION_TO_RADIANS = STEERING_GEAR_RATIO * Math.PI * 2d;
@@ -85,60 +86,61 @@ public final class Constants {
     // public static final double MODULE_KD = 0.03;
 
     // NOTE: This may need additional tuning!
-    public static final double MODULE_KP = 0.56368;// 0.75628;// 0.7491; //.5;
+    public static final double MODULE_KP = 0.46368;// 0.75628;// 0.7491; //.5;
     public static final double MODULE_KD = 0.0066806;// 0.0057682; //0.0076954;
 
     // --------- Front Left Module --------- \\
-    public static final int FL_DRIVE_ID = 1;
-    public static final int FL_STEER_ID = 2;
-    public static final int FL_ABSOLUTE_ENCODER_PORT = 1;
-    public static final double FL_OFFSET_RADIANS = Units.rotationsToRadians(0.213135) + Math.PI * 0.5 + Math.PI;
+    public static final int FL_DRIVE_ID = 4;
+    public static final int FL_STEER_ID = 4;
+    public static final int FL_ABSOLUTE_ENCODER_PORT = 4;
+    public static final double FL_OFFSET_RADIANS = Units.rotationsToRadians(0.389) + Math.PI * 0.5 + Math.PI;
     public static final boolean FL_ABSOLUTE_ENCODER_REVERSED = true;
     public static final boolean FL_MOTOR_REVERSED = true;
 
     // --------- Front Right Module --------- \\
-    public static final int FR_DRIVE_ID = 7;
-    public static final int FR_STEER_ID = 8;
-    public static final int FR_ABSOLUTE_ENCODER_PORT = 2;
-    public static final double FR_OFFSET_RADIANS = Units.rotationsToRadians(-0.305908) + Math.PI * 0.5 + Math.PI;
+    public static final int FR_DRIVE_ID = 1;
+    public static final int FR_STEER_ID = 1;
+    public static final int FR_ABSOLUTE_ENCODER_PORT = 1;
+    public static final double FR_OFFSET_RADIANS = Units.rotationsToRadians(0.323) + Math.PI * 0.5 + Math.PI;
     public static final boolean FR_ABSOLUTE_ENCODER_REVERSED = true;
     public static final boolean FR_MOTOR_REVERSED = true;
 
     // --------- Back Right Module --------- \\
-    public static final int BR_DRIVE_ID = 5;
-    public static final int BR_STEER_ID = 6;
+    public static final int BR_DRIVE_ID = 3;
+    public static final int BR_STEER_ID = 3;
     public static final int BR_ABSOLUTE_ENCODER_PORT = 3;
-    public static final double BR_OFFSET_RADIANS = Units.rotationsToRadians(0.230225) + Math.PI * 0.5 + Math.PI;
+    public static final double BR_OFFSET_RADIANS = Units.rotationsToRadians(0.387) + Math.PI * 0.5 + Math.PI;
     public static final boolean BR_ABSOLUTE_ENCODER_REVERSED = true;
     public static final boolean BR_MOTOR_REVERSED = true;
 
     // --------- Back Left Module --------- \\
-    public static final int BL_DRIVE_ID = 3;
-    public static final int BL_STEER_ID = 4;
-    public static final int BL_ABSOLUTE_ENCODER_PORT = 4;
-    public static final double BL_OFFSET_RADIANS = Units.rotationsToRadians(-0.077637) + Math.PI * 0.5 + Math.PI;
+    public static final int BL_DRIVE_ID = 2;
+    public static final int BL_STEER_ID = 2;
+    public static final int BL_ABSOLUTE_ENCODER_PORT = 2;
+    public static final double BL_OFFSET_RADIANS = Units.rotationsToRadians(-.359) + Math.PI * 0.5 + Math.PI;
     public static final boolean BL_ABSOLUTE_ENCODER_REVERSED = true;
     public static final boolean BL_MOTOR_REVERSED = true;
 
   }
 
   public static class DriveConstants {
-    public static final double MAX_MODULE_VELOCITY = 4.8;
-    public static final double MAX_ROBOT_VELOCITY = 4.8;
+    // TODO: Make sure that this is correct - this is from the SDS website but needs empirical verification
+    public static final double MAX_MODULE_VELOCITY = 5.21;
+    public static final double MAX_ROBOT_VELOCITY = 5.21;
     public static final double MAX_ROBOT_RAD_VELOCITY = 12.0; // Approx. Measured rads/sec
 
-    // TODO: Change based on actual robot!
     public static final double TRACK_WIDTH = Units.inchesToMeters(19.75);
     public static final double WHEEL_BASE = Units.inchesToMeters(19.75);
-    // TODO: Set this
+    // TODO: Set this for FWERB V2
     public static final Rotation2d NAVX_ANGLE_OFFSET = Rotation2d.fromDegrees(90);
+    // TODO: I'm not going to touch this... but it seems important!
     public static final double DRIVE_BASE_RADIUS = Units.inchesToMeters(15);
 
     public static final class ModuleIndices {
       public static final int FRONT_LEFT = 0;
       public static final int FRONT_RIGHT = 2;
-      public static final int REAR_LEFT = 1;
-      public static final int REAR_RIGHT = 3;
+      public static final int REAR_LEFT = 3;
+      public static final int REAR_RIGHT = 1;
     }
 
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
