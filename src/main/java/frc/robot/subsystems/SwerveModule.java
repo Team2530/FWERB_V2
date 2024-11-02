@@ -12,6 +12,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.Constants.*;
@@ -136,6 +137,7 @@ public class SwerveModule {
     public void setModuleStateRaw(SwerveModuleState state) {
         state = SwerveModuleState.optimize(state, new Rotation2d(getSteerPosition()));
         double drive_command = state.speedMetersPerSecond / DriveConstants.MAX_MODULE_VELOCITY;
+        // SmartDashboard.putNumber("Module " + Integer.toString(this.thisModuleNumber) + " Drive", drive_command);
         driveMotor.set(drive_command * (motor_inv ? -1.0 : 1.0));
 
         // This is stupid

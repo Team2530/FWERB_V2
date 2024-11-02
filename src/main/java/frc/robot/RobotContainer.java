@@ -63,7 +63,8 @@ public class RobotContainer {
         // Configure the trigger bindings
         configureBindings();
 
-        // DataLogManager.logNetworkTables(true);
+        DataLogManager.logNetworkTables(true);
+        DataLogManager.start();
 
         // NamedCommands.registerCommand("NoNote", new (
         //     new WaitForCommand(1.0),
