@@ -56,6 +56,9 @@ public class RobotContainer {
     private final UsbCamera intakeCam = CameraServer.startAutomaticCapture();
     private final DriveCommand normalDrive = new DriveCommand(swerveDriveSubsystem, driverXbox.getHID());
 
+    private final ElevatorSub elevatorSub = new ElevatorSub(Constants.Elevator.elevatorOnePort);
+    private final ElevatorCommand elevatorCommand = new ElevatorCommand(elevatorSub, 90.0); // Example target position
+
 /* 
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -160,6 +163,7 @@ public class RobotContainer {
             swerveDriveSubsystem.setRotationStyle(RotationStyle.Driver);
         }));
 
+        driverXbox.a().onTrue(elevatorCommand);
 
         // // Fine tune on stage 2
 

@@ -157,6 +157,21 @@ public final class Constants {
     public static final boolean LOG_INTO_FILE_ENABLED = false;
   }
 
+  public static class Elevator{
+    public static final int elevatorOnePort = 0;
+    public static final int elevatorTwoPort = 0;
+    
+    //please dear god I stole these PID constants online PLEASE SOMEONE CHANGE THEM (not me tho i'm lazy)        
+    public static class PID{
+      public static double kP = 5.5;
+      public static double kI = 0.4;
+      public static double kD = 0.0;
+      public static double MAX_VELOCITY = 20.0;
+      public static double MAX_ACCELERATION = 20.0;
+      public static double TURNOVER_THRESHOLD = 270.0;
+    }
+  }
+
   public static final class PathPlannerConstants {
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5, 0, 0.2);
     public static final PIDConstants ROTATION_PID = new PIDConstants(5, 0, 0.2);
