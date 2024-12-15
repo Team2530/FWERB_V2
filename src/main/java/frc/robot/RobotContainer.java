@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.*;
 import frc.robot.commands.*;
+import frc.robot.commands.ElevatorCommand.ElevatorPresets;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -56,8 +57,7 @@ public class RobotContainer {
     private final UsbCamera intakeCam = CameraServer.startAutomaticCapture();
     private final DriveCommand normalDrive = new DriveCommand(swerveDriveSubsystem, driverXbox.getHID());
 
-    private final ElevatorSub elevatorSub = new ElevatorSub(Constants.Elevator.elevatorOnePort);
-    private final ElevatorCommand elevatorCommand = new ElevatorCommand(elevatorSub, 90.0); // Example target position
+    private final ElevatorSubsystem elevatorSub = new ElevatorSubsystem();
 
 /* 
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -163,7 +163,9 @@ public class RobotContainer {
             swerveDriveSubsystem.setRotationStyle(RotationStyle.Driver);
         }));
 
-        driverXbox.a().onTrue(elevatorCommand);
+        operatorXbox.a().onTrue(new ElevatorCommand(elevatorSub, ElevatorPresets.STOW));        
+        operatorXbox.b().onTrue(new ElevatorCommand(elevatorSub, ElevatorPresets.MIDDLE));
+        operatorXbox.x().onTrue(new ElevatorCommand(elevatorSub, ElevatorPresets.TOP));
 
         // // Fine tune on stage 2
 

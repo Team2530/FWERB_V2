@@ -8,6 +8,7 @@ import com.pathplanner.lib.util.GeometryUtil;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import com.revrobotics.SparkLimitSwitch;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -158,17 +159,33 @@ public final class Constants {
   }
 
   public static class Elevator{
-    public static final int elevatorOnePort = 0;
-    public static final int elevatorTwoPort = 0;
+    public static final int elevatorOnePort = 10;
+    public static final int elevatorTwoPort = 11;
+
+    public static boolean elevatorOneInverted = false;
+    public static boolean elevatorTwoInverted = false;
+    public static boolean elevatorEncoderInverted = false;
+
+    public static SparkLimitSwitch.Type bottomLimitMode = SparkLimitSwitch.Type.kNormallyClosed;
+
+    public static double motorTurnsPerMeter = 39.44;
+    public static double elevatorHeightMeters = Units.inchesToMeters(51.0);
     
-    //please dear god I stole these PID constants online PLEASE SOMEONE CHANGE THEM (not me tho i'm lazy)        
-    public static class PID{
-      public static double kP = 5.5;
-      public static double kI = 0.4;
+    public static class PID {
+      public static double kP = 0.1;
+      public static double kI = 0.0;
       public static double kD = 0.0;
       public static double MAX_VELOCITY = 20.0;
       public static double MAX_ACCELERATION = 20.0;
-      public static double TURNOVER_THRESHOLD = 270.0;
+    }
+
+    // TODO: For the first testing, set these all to zero for safety reasons
+    // Remind me to pad the top and bottom of the elevator with poodles to make sure we don't damage it.
+    public static class Feedforward {
+      public static double Ks = 0.0;
+      public static double Kv = 4.19;
+      public static double Ka = 0.01;
+      public static double Kg = 0.05;
     }
   }
 
