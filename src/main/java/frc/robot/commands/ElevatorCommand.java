@@ -3,14 +3,15 @@ package frc.robot.commands;
 import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ElevatorCommand extends Command {
     private final ElevatorSubsystem elevatorSub;
 
     public enum ElevatorPresets {
-        STOW(0.0),        
-        MIDDLE(Constants.Elevator.elevatorHeightMeters/2),
+        STOW(0.0),
+        MIDDLE(Constants.Elevator.elevatorHeightMeters / 2),
         TOP(Constants.Elevator.elevatorHeightMeters);
 
         private ElevatorPresets(double pos_meters) {
@@ -22,10 +23,10 @@ public class ElevatorCommand extends Command {
 
     private ElevatorPresets target;
 
-
     public ElevatorCommand(ElevatorSubsystem elevatorSub, ElevatorPresets targetPosition) {
         this.elevatorSub = elevatorSub;
         this.target = targetPosition;
+        SmartDashboard.putString("Elevator Command", targetPosition.toString());
         addRequirements(elevatorSub);
     }
 
