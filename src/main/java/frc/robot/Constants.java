@@ -175,8 +175,8 @@ public final class Constants {
       public static double kP = 0.1;
       public static double kI = 0.0;
       public static double kD = 0.0;
-      public static double MAX_VELOCITY = 20.0;
-      public static double MAX_ACCELERATION = 20.0;
+      public static double MAX_VELOCITY = 1.0;
+      public static double MAX_ACCELERATION = 10.0;
     }
 
     // TODO: For the first testing, set these all to zero for safety reasons
