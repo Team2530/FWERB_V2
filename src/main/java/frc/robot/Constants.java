@@ -19,11 +19,13 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -75,7 +77,7 @@ public final class Constants {
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
     public static final double STEERING_GEAR_RATIO = 1.d / (150d / 7d);
     // This is for L2 modules with 16T pinions
-    public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d) * (16.f/14.f);
+    public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d) * (16.f / 14.f);
 
     public static final double DRIVE_ROTATION_TO_METER = DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER;
     public static final double STEER_ROTATION_TO_RADIANS = STEERING_GEAR_RATIO * Math.PI * 2d;
@@ -125,7 +127,8 @@ public final class Constants {
   }
 
   public static class DriveConstants {
-    // TODO: Make sure that this is correct - this is from the SDS website but needs empirical verification
+    // TODO: Make sure that this is correct - this is from the SDS website but needs
+    // empirical verification
     public static final double MAX_MODULE_VELOCITY = 5.21;
     public static final double MAX_ROBOT_VELOCITY = 5.21;
     public static final double MAX_ROBOT_RAD_VELOCITY = 12.0; // Approx. Measured rads/sec
@@ -158,34 +161,42 @@ public final class Constants {
     public static final boolean LOG_INTO_FILE_ENABLED = false;
   }
 
-  public static class Elevator{
+  public static class Elevator {
     public static final int elevatorOnePort = 10;
     public static final int elevatorTwoPort = 11;
 
     public static boolean elevatorOneInverted = false;
     public static boolean elevatorTwoInverted = false;
-    public static boolean elevatorEncoderInverted = false;
+    // public static boolean elevatorEncoderInverted = false;
 
     public static SparkLimitSwitch.Type bottomLimitMode = SparkLimitSwitch.Type.kNormallyClosed;
 
     public static double motorTurnsPerMeter = 39.44;
-    public static double elevatorHeightMeters = Units.inchesToMeters(51.0);
-    
+
     public static class PID {
-      public static double kP = 0.1;
+      public static double kP = 90.0;
       public static double kI = 0.0;
-      public static double kD = 0.0;
-      public static double MAX_VELOCITY = 1.0;
-      public static double MAX_ACCELERATION = 10.0;
+      public static double kD = 4.0;
+      public static double MAX_VELOCITY = 1.25;
+      public static double MAX_ACCELERATION = 5.0;
     }
 
     // TODO: For the first testing, set these all to zero for safety reasons
-    // Remind me to pad the top and bottom of the elevator with poodles to make sure we don't damage it.
+    // Remind me to pad the top and bottom of the elevator with poodles to make sure
+    // we don't damage it.
     public static class Feedforward {
       public static double Ks = 0.0;
       public static double Kv = 4.19;
       public static double Ka = 0.01;
       public static double Kg = 0.05;
+    }
+
+    public static class PhysicalParameters {
+      public static double gearReduction = 9.0;
+      public static double driveRadiusMeters = 0.0182;
+      public static double carriageMassKg = 1.0;
+      public static double elevatorHeightMeters = Units.inchesToMeters(51.0);
+      public static DCMotor simMotor = DCMotor.getNeoVortex(2);
     }
   }
 

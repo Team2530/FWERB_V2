@@ -11,8 +11,8 @@ public class ElevatorCommand extends Command {
 
     public enum ElevatorPresets {
         STOW(0.0),
-        MIDDLE(Constants.Elevator.elevatorHeightMeters / 2),
-        TOP(Constants.Elevator.elevatorHeightMeters);
+        MIDDLE(Constants.Elevator.PhysicalParameters.elevatorHeightMeters / 2),
+        TOP(Constants.Elevator.PhysicalParameters.elevatorHeightMeters);
 
         private ElevatorPresets(double pos_meters) {
             this.position_m = pos_meters;
@@ -21,18 +21,18 @@ public class ElevatorCommand extends Command {
         private double position_m;
     }
 
-    private ElevatorPresets target;
+    private ElevatorPresets target = ElevatorPresets.STOW;
 
     public ElevatorCommand(ElevatorSubsystem elevatorSub, ElevatorPresets targetPosition) {
         this.elevatorSub = elevatorSub;
         this.target = targetPosition;
-        SmartDashboard.putString("Elevator Command", targetPosition.toString());
         addRequirements(elevatorSub);
     }
 
     @Override
     public void initialize() {
         elevatorSub.setGoal(target.position_m);
+        SmartDashboard.putString("Elevator Command", target.toString());
     }
 
     @Override

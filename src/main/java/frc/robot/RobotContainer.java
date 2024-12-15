@@ -48,7 +48,7 @@ public class RobotContainer {
 
     // private final CommandXboxController debugXbox = new CommandXboxController(0);
 
-   private final SendableChooser<Command> autoChooser;
+    private final SendableChooser<Command> autoChooser;
 
     private final SwerveSubsystem swerveDriveSubsystem = new SwerveSubsystem();
     // private final LimeLightSubsystem limeLightSubsystem = new
@@ -59,7 +59,7 @@ public class RobotContainer {
 
     private final ElevatorSubsystem elevatorSub = new ElevatorSubsystem();
 
-/* 
+    /*
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
@@ -70,17 +70,14 @@ public class RobotContainer {
         DataLogManager.start();
 
         // NamedCommands.registerCommand("NoNote", new (
-        //     new WaitForCommand(1.0),
-        //     new WaitUntilCommand(new BooleanSupplier() {
-        //         @Override
-        //         public boolean getAsBoolean() {
-        //             return !intake.containsNote().getAsBoolean();
-        //         }
-        //     })
+        // new WaitForCommand(1.0),
+        // new WaitUntilCommand(new BooleanSupplier() {
+        // @Override
+        // public boolean getAsBoolean() {
+        // return !intake.containsNote().getAsBoolean();
+        // }
+        // })
         // ));
-         
-        
-        
 
         /*
          * NamedCommands.registerCommand("Shoot Close", new SequentialCommandGroup(
@@ -117,6 +114,10 @@ public class RobotContainer {
     // Command spoolAction =
     // Command intakeAction = ;
 
+    private ElevatorCommand elevatorToTop = new ElevatorCommand(elevatorSub, ElevatorPresets.TOP);
+    private ElevatorCommand elevatorToMiddle = new ElevatorCommand(elevatorSub, ElevatorPresets.MIDDLE);
+    private ElevatorCommand elevatorToStow = new ElevatorCommand(elevatorSub, ElevatorPresets.STOW);
+
     /**
      * Use this method to define your trigger->command mappings. Triggers can be
      * created via the
@@ -145,11 +146,12 @@ public class RobotContainer {
 
         // Driver trigger shoot
         // driverXbox.leftTrigger().and(new BooleanSupplier() {
-        //     @Override
-        //     public boolean getAsBoolean() {
-        //         return driverXbox.getLeftTriggerAxis() > 0.25 && shooter.isUpToSpeed();
-        //     }
-        // }).onTrue(new ShootCommand(shooter, intake).deadlineWith(new WaitCommand(1.0)));
+        // @Override
+        // public boolean getAsBoolean() {
+        // return driverXbox.getLeftTriggerAxis() > 0.25 && shooter.isUpToSpeed();
+        // }
+        // }).onTrue(new ShootCommand(shooter, intake).deadlineWith(new
+        // WaitCommand(1.0)));
 
         driverXbox.a().onTrue(new InstantCommand(() -> {
             swerveDriveSubsystem.setRotationStyle(RotationStyle.AutoSpeaker);
@@ -163,9 +165,12 @@ public class RobotContainer {
             swerveDriveSubsystem.setRotationStyle(RotationStyle.Driver);
         }));
 
-        operatorXbox.a().onTrue(new ElevatorCommand(elevatorSub, ElevatorPresets.STOW));        
-        operatorXbox.b().onTrue(new ElevatorCommand(elevatorSub, ElevatorPresets.MIDDLE));
-        operatorXbox.x().onTrue(new ElevatorCommand(elevatorSub, ElevatorPresets.TOP));
+        operatorXbox.a()
+                .onTrue(elevatorToStow);
+        operatorXbox.b()
+                .onTrue(elevatorToMiddle);
+        operatorXbox.x()
+                .onTrue(elevatorToTop);
 
         // // Fine tune on stage 2
 
