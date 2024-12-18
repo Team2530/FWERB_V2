@@ -194,8 +194,8 @@ public final class Constants {
     public static class PhysicalParameters {
       public static double gearReduction = 9.0;
       public static double driveRadiusMeters = 0.0182;
-      public static double carriageMassKg = 1.0;
-      public static double elevatorHeightMeters = Units.inchesToMeters(51.0);
+      public static double carriageMassKg = 1.5;
+      public static double elevatorHeightMeters = Units.inchesToMeters(50.0);
       public static DCMotor simMotor = DCMotor.getNeoVortex(2);
     }
   }
