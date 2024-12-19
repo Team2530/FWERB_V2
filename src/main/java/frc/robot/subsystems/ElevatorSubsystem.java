@@ -48,8 +48,8 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
      * double startingHeightMeters,
      * Matrix<N1, N1> measurementStdDevs
      */
-    private boolean isZeroed = false;
-    private final RelativeEncoder elevatorEncoder = elevatorMotorOne.getEncoder();
+    private boolean isZeroed = false; // TODO: CHENAGE
+    private final RelativeEncoder elevatorEncoder;
     private final SparkLimitSwitch bottomLimit;
 
     private final ElevatorSim simulation = new ElevatorSim(
@@ -76,14 +76,26 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
         // TODO: Check that this is an acceptable tolerance!
         this.getController().setTolerance(Units.inchesToMeters(0.5));
 
-        isZeroed = false;
+        // isZeroed = false;
 
         elevatorMotorOne.setIdleMode(CANSparkFlex.IdleMode.kBrake);
         elevatorMotorTwo.setIdleMode(CANSparkFlex.IdleMode.kBrake);
 
-        elevatorEncoder.setPositionConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
-        elevatorEncoder.setVelocityConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
+        elevatorMotorOne.getEncoder().setPositionConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
+        elevatorMotorOne.getEncoder().setVelocityConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
+
+        elevatorMotorTwo.getEncoder().setPositionConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
+        elevatorMotorTwo.getEncoder().setVelocityConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
+
+        elevatorEncoder = elevatorMotorOne.getEncoder();
+
         // elevatorEncoder.setInverted(Constants.Elevator.elevatorEncoderInverted);
+
+        elevatorMotorOne.setInverted(Constants.Elevator.elevatorOneInverted);
+        elevatorMotorTwo.setInverted(Constants.Elevator.elevatorTwoInverted);
+
+        elevatorMotorOne.getEncoder().setPosition(0);
+        elevatorMotorTwo.getEncoder().setPosition(0);
 
         bottomLimit = elevatorMotorOne.getReverseLimitSwitch(Constants.Elevator.bottomLimitMode);
 
@@ -95,20 +107,27 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
 
     @Override
     public void useOutput(double output, TrapezoidProfile.State setpoint) {
-        // TODO: Elevator feedforward
-        // double feedforward = m_feedforward.calculate(setpoint.position,
-        // setpoint.velocity);
         double ff = feedForward.calculate(setpoint.velocity, 0.0);
 
         if (isZeroed || Robot.isSimulation()) {
-            elevatorMotorOne.setVoltage(output + ff);
-            elevatorMotorTwo.setVoltage(output + ff);
+            double op = ff + output;
+            if (bottomLimit.isPressed() && (op < 0.0)) {
+                elevatorMotorOne.setVoltage(0.0);
+                elevatorMotorTwo.setVoltage(0.0);
+            } else {
+                elevatorMotorOne.setVoltage(op);
+                elevatorMotorTwo.setVoltage(op);
+            }
+
+            // elevatorMotorOne.setVoltage(2);
+            // elevatorMotorTwo.setVoltage(2);
+
             SmartDashboard.putNumber("Elevator Total Output", output + ff);
             SmartDashboard.putNumber("Elevator PID Output", output);
             SmartDashboard.putNumber("Elevator FF Output", ff);
             SmartDashboard.putNumber("Current Elevator Target (profiled)", setpoint.position);
             if (Robot.isSimulation()) {
-                simulation.setInputVoltage(MathUtil.clamp(output + ff, -12.0, 12.0));
+                simulation.setInputVoltage(MathUtil.clamp((output + ff) * 12.0, -12.0, 12.0));
             }
         } else {
             // Move down a little bit to zero
@@ -125,18 +144,23 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
     @Override
     public void periodic() {
         // TODO Auto-generated method stub
-        super.periodic();
 
-        if (bottomLimit.isPressed() && (!isZeroed)) {
+        if ((bottomLimit.isPressed()) && (!isZeroed)) {
             elevatorEncoder.setPosition(0.0);
             setGoal(0.0);
             isZeroed = true;
         }
 
+        super.periodic();
+
         SmartDashboard.putNumber("Current Elevator Position", getMeasurement());
         SmartDashboard.putNumber("Goal Elevator Position", this.getController().getGoal().position);
         SmartDashboard.putBoolean("Elevator Zeroed", isZeroed);
         SmartDashboard.putBoolean("Elevator Bottom Limit", bottomLimit.isPressed());
+
+        SmartDashboard.putNumber("Elevator motor 1 encoder", elevatorMotorOne.getEncoder().getPosition());
+        SmartDashboard.putNumber("Elevator motor 2 encoder", elevatorMotorTwo.getEncoder().getPosition());
+
     }
 
     @Override

@@ -165,18 +165,18 @@ public final class Constants {
     public static final int elevatorOnePort = 10;
     public static final int elevatorTwoPort = 11;
 
-    public static boolean elevatorOneInverted = false;
+    public static boolean elevatorOneInverted = true;
     public static boolean elevatorTwoInverted = false;
     // public static boolean elevatorEncoderInverted = false;
 
-    public static SparkLimitSwitch.Type bottomLimitMode = SparkLimitSwitch.Type.kNormallyClosed;
+    public static SparkLimitSwitch.Type bottomLimitMode = SparkLimitSwitch.Type.kNormallyOpen;
 
     public static double motorTurnsPerMeter = 39.44;
 
     public static class PID {
-      public static double kP = 90.0;
+      public static double kP = 8.0; // 9.0;
       public static double kI = 0.0;
-      public static double kD = 4.0;
+      public static double kD = 0.0; // 4.0;
       public static double MAX_VELOCITY = 1.25;
       public static double MAX_ACCELERATION = 5.0;
     }
@@ -186,9 +186,9 @@ public final class Constants {
     // we don't damage it.
     public static class Feedforward {
       public static double Ks = 0.0;
-      public static double Kv = 4.19;
+      public static double Kv = 1.0;
       public static double Ka = 0.01;
-      public static double Kg = 0.05;
+      public static double Kg = 0.09;
     }
 
     public static class PhysicalParameters {
