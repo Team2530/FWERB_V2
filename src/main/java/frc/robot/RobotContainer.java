@@ -167,9 +167,9 @@ public class RobotContainer {
 
         operatorXbox.a()
                 .onTrue(elevatorToStow);
-        operatorXbox.b()
-                .onTrue(elevatorToMiddle);
         operatorXbox.x()
+                .onTrue(elevatorToMiddle);
+        operatorXbox.y()
                 .onTrue(elevatorToTop);
 
         // // Fine tune on stage 2

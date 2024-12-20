@@ -111,20 +111,20 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
 
         if (isZeroed || Robot.isSimulation()) {
             double op = ff + output;
-            if (bottomLimit.isPressed() && (op < 0.0)) {
-                elevatorMotorOne.setVoltage(0.0);
-                elevatorMotorTwo.setVoltage(0.0);
-            } else {
-                elevatorMotorOne.setVoltage(op);
-                elevatorMotorTwo.setVoltage(op);
-            }
+            // if (bottomLimit.isPressed() && (op < 0.0)) {
+            // elevatorMotorOne.setVoltage(0.0);
+            // elevatorMotorTwo.setVoltage(0.0);
+            // } else {
+            elevatorMotorOne.set(op / 12.0);
+            elevatorMotorTwo.set(op / 12.0);
+            // }
 
             // elevatorMotorOne.setVoltage(2);
             // elevatorMotorTwo.setVoltage(2);
 
-            SmartDashboard.putNumber("Elevator Total Output", output + ff);
-            SmartDashboard.putNumber("Elevator PID Output", output);
-            SmartDashboard.putNumber("Elevator FF Output", ff);
+            SmartDashboard.putNumber("Elevator Total Output", op / 12);
+            SmartDashboard.putNumber("Elevator PID Output", output / 12);
+            SmartDashboard.putNumber("Elevator FF Output", ff / 12);
             SmartDashboard.putNumber("Current Elevator Target (profiled)", setpoint.position);
             if (Robot.isSimulation()) {
                 simulation.setInputVoltage(MathUtil.clamp((output + ff) * 12.0, -12.0, 12.0));
@@ -153,6 +153,12 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
 
         super.periodic();
 
+        SmartDashboard.putNumber("Elevator One Output", elevatorMotorOne.getAppliedOutput());
+        SmartDashboard.putNumber("Elevator One GET Output", elevatorMotorOne.get());
+
+        SmartDashboard.putNumber("Elevator Two Output", elevatorMotorTwo.getAppliedOutput());
+        SmartDashboard.putNumber("Elevator Two GET Output", elevatorMotorTwo.get());
+
         SmartDashboard.putNumber("Current Elevator Position", getMeasurement());
         SmartDashboard.putNumber("Goal Elevator Position", this.getController().getGoal().position);
         SmartDashboard.putBoolean("Elevator Zeroed", isZeroed);
@@ -161,6 +167,8 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
         SmartDashboard.putNumber("Elevator motor 1 encoder", elevatorMotorOne.getEncoder().getPosition());
         SmartDashboard.putNumber("Elevator motor 2 encoder", elevatorMotorTwo.getEncoder().getPosition());
 
+        SmartDashboard.putNumber("Elevator motor 1 current", elevatorMotorOne.getOutputCurrent());
+        SmartDashboard.putNumber("Elevator motor 1 output voltage", elevatorMotorOne.getBusVoltage());
     }
 
     @Override
