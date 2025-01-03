@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,16 +23,19 @@ public class ElevatorCommand extends Command {
     }
 
     private ElevatorPresets target = ElevatorPresets.STOW;
+    private double offset;
 
-    public ElevatorCommand(ElevatorSubsystem elevatorSub, ElevatorPresets targetPosition) {
+    public ElevatorCommand(ElevatorSubsystem elevatorSub, ElevatorPresets targetPosition, double targetOffset) {
         this.elevatorSub = elevatorSub;
         this.target = targetPosition;
+        this.offset = targetOffset;
         addRequirements(elevatorSub);
     }
 
     @Override
     public void initialize() {
-        elevatorSub.setGoal(target.position_m);
+        double tgt = target.position_m + offset;
+        elevatorSub.setGoal(MathUtil.clamp(tgt, 0, Constants.Elevator.PhysicalParameters.elevatorHeightMeters));
         SmartDashboard.putString("Elevator Command", target.toString());
     }
 

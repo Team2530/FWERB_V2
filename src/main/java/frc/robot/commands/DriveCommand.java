@@ -74,7 +74,7 @@ public class DriveCommand extends Command {
     @Override
     public void execute() {
         Translation2d xyRaw = new Translation2d(xbox.getLeftX(), xbox.getLeftY());
-        Translation2d xySpeed = DeadBand(xyRaw, 0.15/2.f);
+        Translation2d xySpeed = DeadBand(xyRaw, 0.15 / 2.f);
         double zSpeed = DeadBand(xbox.getRightX(), 0.1);
         double xSpeed = xySpeed.getX(); // xbox.getLeftX();
         double ySpeed = xySpeed.getY(); // xbox.getLeftY();
@@ -87,7 +87,6 @@ public class DriveCommand extends Command {
         // ySpeed = mag_xy > 0.15 ? ySpeed : 0.0;
         // zSpeed = Math.abs(zSpeed) > 0.15 ? zSpeed : 0.0;
 
-        // TODO: Full speed!
         xSpeed *= DriveConstants.XY_SPEED_LIMIT * DriveConstants.MAX_ROBOT_VELOCITY;
         ySpeed *= DriveConstants.XY_SPEED_LIMIT * DriveConstants.MAX_ROBOT_VELOCITY;
         zSpeed *= DriveConstants.Z_SPEED_LIMIT * DriveConstants.MAX_ROBOT_RAD_VELOCITY;
@@ -103,41 +102,49 @@ public class DriveCommand extends Command {
         if (xbox.getXButton()) {
             swerveSubsystem.zeroHeading();
             Translation2d pospose = swerveSubsystem.getPose().getTranslation();
-            swerveSubsystem.odometry.resetPosition(swerveSubsystem.getRotation2d(), swerveSubsystem.getModulePositions(), 
-                new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Blue ? 0.0 : Math.PI))
-            );
+            swerveSubsystem.odometry.resetPosition(swerveSubsystem.getRotation2d(),
+                    swerveSubsystem.getModulePositions(),
+                    new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Blue ? 0.0 : Math.PI)));
             // swerveSubsystem.resetOdometry(new Pose2d(1.38, 5.55, new Rotation2d()));
             // swerveSubsystem.zeroHeading();
         }
 
         ChassisSpeeds speeds;
 
-
         // switch (swerveSubsystem.getRotationStyle()) {
-        //     // case Driver:
-        
-        //     //     // do nothing special
-        //     //     break;
-        //     // case AutoSpeaker:
-        //     //     // Rotation2d r =
-        //     //     // swerveSubsystem.getPose().getTranslation().minus(FieldConstants.getSpeakerPosition()).getAngle();
-        //     //     // if (DriverStation.getAlliance().get() == Alliance.Red)
-        //     //     // r = r.rotateBy(new Rotation2d(Math.PI));
-        //     //     // double calculatedAngle = targeting.getPhi(arm.getHorizOffset());
-        //     //     // SmartDashboard.putNumber("Wanted Heading", calculatedAngle);
-        //     //     SmartDashboard.putNumberArray("Phi control", new double[] {
-        //     //             calculatedAngle,
-        //     //             swerveSubsystem.getHeading()
-        //     //     });
-        //     //     zSpeed = MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians() + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0), calculatedAngle),
-        //     //             -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY);
-        //     //     break;
-        //     // case AutoShuttle:
-        //     //     double shuttleCalculatedAngle = targeting.getShuttlePhi();
+        // // case Driver:
 
-        //     //     zSpeed = MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians() + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0), shuttleCalculatedAngle),
-        //     //             -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY);
-        //     //     break;
+        // // // do nothing special
+        // // break;
+        // // case AutoSpeaker:
+        // // // Rotation2d r =
+        // // //
+        // swerveSubsystem.getPose().getTranslation().minus(FieldConstants.getSpeakerPosition()).getAngle();
+        // // // if (DriverStation.getAlliance().get() == Alliance.Red)
+        // // // r = r.rotateBy(new Rotation2d(Math.PI));
+        // // // double calculatedAngle = targeting.getPhi(arm.getHorizOffset());
+        // // // SmartDashboard.putNumber("Wanted Heading", calculatedAngle);
+        // // SmartDashboard.putNumberArray("Phi control", new double[] {
+        // // calculatedAngle,
+        // // swerveSubsystem.getHeading()
+        // // });
+        // // zSpeed =
+        // MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians()
+        // + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0),
+        // calculatedAngle),
+        // // -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 *
+        // DriveConstants.MAX_ROBOT_RAD_VELOCITY);
+        // // break;
+        // // case AutoShuttle:
+        // // double shuttleCalculatedAngle = targeting.getShuttlePhi();
+
+        // // zSpeed =
+        // MathUtil.clamp(-rotationController.calculate(swerveSubsystem.getPose().getRotation().getRadians()
+        // + ((FieldConstants.getAlliance() == Alliance.Red) ? Math.PI : 0.0),
+        // shuttleCalculatedAngle),
+        // // -0.5 * DriveConstants.MAX_ROBOT_RAD_VELOCITY, 0.5 *
+        // DriveConstants.MAX_ROBOT_RAD_VELOCITY);
+        // // break;
         // }
 
         // Drive Non Field Oriented
@@ -178,8 +185,6 @@ public class DriveCommand extends Command {
                 swerveSubsystem.setXstance();
                 break;
         }
-
-        // SmartDashboard.putString("Chassis eeeeeeeeeds", targeting.getBotVelocity().toString());
     }
 
     @Override

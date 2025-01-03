@@ -17,6 +17,7 @@ import frc.robot.subsystems.SwerveSubsystem.RotationStyle;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
@@ -57,7 +58,7 @@ public class RobotContainer {
     private final UsbCamera intakeCam = CameraServer.startAutomaticCapture();
     private final DriveCommand normalDrive = new DriveCommand(swerveDriveSubsystem, driverXbox.getHID());
 
-    private final ElevatorSubsystem elevatorSub = new ElevatorSubsystem();
+    private final ElevatorSubsystem elevator = new ElevatorSubsystem();
 
     /*
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -114,9 +115,9 @@ public class RobotContainer {
     // Command spoolAction =
     // Command intakeAction = ;
 
-    private ElevatorCommand elevatorToTop = new ElevatorCommand(elevatorSub, ElevatorPresets.TOP);
-    private ElevatorCommand elevatorToMiddle = new ElevatorCommand(elevatorSub, ElevatorPresets.MIDDLE);
-    private ElevatorCommand elevatorToStow = new ElevatorCommand(elevatorSub, ElevatorPresets.STOW);
+    private ElevatorCommand elevatorToTop = new ElevatorCommand(elevator, ElevatorPresets.TOP, 0.0);
+    private ElevatorCommand elevatorToMiddle = new ElevatorCommand(elevator, ElevatorPresets.MIDDLE, 0.0);
+    private ElevatorCommand elevatorToStow = new ElevatorCommand(elevator, ElevatorPresets.STOW, 0.0);
 
     /**
      * Use this method to define your trigger->command mappings. Triggers can be
@@ -133,38 +134,6 @@ public class RobotContainer {
      * joysticks}.
      */
     private void configureBindings() {
-        // debugXbox.a().onTrue(new AlignNoteCommand(intake, shooter));
-        // debugXbox.b().whileTrue(new AlignNoteCommand(intake, shooter).andThen(new
-        // PrepNoteCommand(intake)));
-        // debugXbox.x().whileTrue(new IntakeCommand(intake).andThen(new
-        // AlignNoteCommand(intake, shooter)))
-        // .onFalse(new InstantCommand(() -> {
-        // intake.setMode(IntakeMode.STOPPED);
-        // }));
-
-        // Stow intake/shooter
-
-        // Driver trigger shoot
-        // driverXbox.leftTrigger().and(new BooleanSupplier() {
-        // @Override
-        // public boolean getAsBoolean() {
-        // return driverXbox.getLeftTriggerAxis() > 0.25 && shooter.isUpToSpeed();
-        // }
-        // }).onTrue(new ShootCommand(shooter, intake).deadlineWith(new
-        // WaitCommand(1.0)));
-
-        driverXbox.a().onTrue(new InstantCommand(() -> {
-            swerveDriveSubsystem.setRotationStyle(RotationStyle.AutoSpeaker);
-        })).onFalse(new InstantCommand(() -> {
-            swerveDriveSubsystem.setRotationStyle(RotationStyle.Driver);
-        }));
-
-        driverXbox.b().onTrue(new InstantCommand(() -> {
-            swerveDriveSubsystem.setRotationStyle(RotationStyle.AutoShuttle);
-        })).onFalse(new InstantCommand(() -> {
-            swerveDriveSubsystem.setRotationStyle(RotationStyle.Driver);
-        }));
-
         operatorXbox.a()
                 .onTrue(elevatorToStow);
         operatorXbox.x()
@@ -172,18 +141,21 @@ public class RobotContainer {
         operatorXbox.y()
                 .onTrue(elevatorToTop);
 
-        // // Fine tune on stage 2
+        operatorXbox.b().whileTrue(new ElevatorFollowCommand(elevator, new DoubleSupplier() {
+            @Override
+            public double getAsDouble() {
+                return (operatorXbox.getLeftY() * -0.5 + 0.5)
+                        * Constants.Elevator.PhysicalParameters.elevatorHeightMeters;
+            }
+        }));
 
-        // // Fine tune stage 1
-        // operatorXbox.leftStick().and(new BooleanSupplier() {
-        // @Override
-        // public boolean getAsBoolean() {
-        // return Math.abs(operatorXbox.getLeftY()) > 0.2;
-        // }
-        // }).whileTrue(new InstantCommand(() -> {
-        // arm.setCustomGoal(arm.getStageOneDegrees(), arm.getStageTwoDegrees() +
-        // (operatorXbox.getLeftY() * ArmConstants.HUMAN_ARM_INPUT_P));
-        // }));
+        operatorXbox.povUp().debounce(0.02).onTrue(new InstantCommand(() -> {
+            elevator.setPosition(elevator.getGoalPosition() + 0.1);
+        }));
+
+        operatorXbox.povDown().debounce(0.02).onTrue(new InstantCommand(() -> {
+            elevator.setPosition(elevator.getGoalPosition() - 0.1);
+        }));
     }
 
     /**

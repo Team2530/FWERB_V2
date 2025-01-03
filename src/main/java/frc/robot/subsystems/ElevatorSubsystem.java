@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import javax.print.attribute.SetOfIntegerSyntax;
+
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
@@ -11,12 +13,17 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
-import edu.wpi.first.wpilibj.simulation.PWMSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import frc.robot.Constants;
@@ -48,8 +55,9 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
      * double startingHeightMeters,
      * Matrix<N1, N1> measurementStdDevs
      */
-    private boolean isZeroed = false; // TODO: CHENAGE
-    private final RelativeEncoder elevatorEncoder;
+    private boolean isZeroed = false;
+    private final RelativeEncoder elevatorEncoderOne;
+    private final RelativeEncoder elevatorEncoderTwo;
     private final SparkLimitSwitch bottomLimit;
 
     private final ElevatorSim simulation = new ElevatorSim(
@@ -60,7 +68,26 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
             0.0,
             Constants.Elevator.PhysicalParameters.elevatorHeightMeters,
             true, 0.0,
-            VecBuilder.fill(0.01));
+            VecBuilder.fill(0.001));
+
+    private DoubleLogEntry elevatorTargetP = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/target/position");
+    private DoubleLogEntry elevatorTargetV = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/target/velocity");
+    private DoubleLogEntry elevatorP = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/state/position");
+    private DoubleLogEntry elevatorV = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/state/velocity");
+    private DoubleLogEntry elevatorOneOutput = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/output1");
+    private DoubleLogEntry elevatorTwoOutput = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/output2");
+    private DoubleLogEntry elevatorOneCurrent = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/current1");
+    private DoubleLogEntry elevatorTwoCurrent = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/current2");
+
+    private Mechanism2d mechanism2D = new Mechanism2d(Constants.RobotConstants.robotLengthMeters,
+            Constants.Elevator.PhysicalParameters.elevatorBottomFromFloorMeters
+                    + Constants.Elevator.PhysicalParameters.elevatorHeightMeters
+                    + Constants.Elevator.PhysicalParameters.elevatorCarriageHeightMeters / 2.0);
+    private MechanismRoot2d rootMechanism = mechanism2D.getRoot("climber",
+            Constants.RobotConstants.robotLengthMeters / 2.0
+                    + Constants.Elevator.PhysicalParameters.elevatorForwardsFromRobotCenterMeters,
+            Constants.Elevator.PhysicalParameters.elevatorBottomFromFloorMeters);
+    private MechanismLigament2d elevatorMechanism;
 
     public ElevatorSubsystem() {
         super(
@@ -73,10 +100,7 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
                                 Constants.Elevator.PID.MAX_ACCELERATION)),
                 0.0);
 
-        // TODO: Check that this is an acceptable tolerance!
         this.getController().setTolerance(Units.inchesToMeters(0.5));
-
-        // isZeroed = false;
 
         elevatorMotorOne.setIdleMode(CANSparkFlex.IdleMode.kBrake);
         elevatorMotorTwo.setIdleMode(CANSparkFlex.IdleMode.kBrake);
@@ -87,9 +111,8 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
         elevatorMotorTwo.getEncoder().setPositionConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
         elevatorMotorTwo.getEncoder().setVelocityConversionFactor(1.0 / Constants.Elevator.motorTurnsPerMeter);
 
-        elevatorEncoder = elevatorMotorOne.getEncoder();
-
-        // elevatorEncoder.setInverted(Constants.Elevator.elevatorEncoderInverted);
+        elevatorEncoderOne = elevatorMotorOne.getEncoder();
+        elevatorEncoderTwo = elevatorMotorTwo.getEncoder();
 
         elevatorMotorOne.setInverted(Constants.Elevator.elevatorOneInverted);
         elevatorMotorTwo.setInverted(Constants.Elevator.elevatorTwoInverted);
@@ -100,34 +123,53 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
         bottomLimit = elevatorMotorOne.getReverseLimitSwitch(Constants.Elevator.bottomLimitMode);
 
         this.enable();
-        // todo check if offset encoders
-        // todo check if motors inverted
-        // todo set elevator tolerance
+
+        this.elevatorMechanism = rootMechanism.append(new MechanismLigament2d("elevator", 0.0, 90));
     }
+
+    public void setPosition(double positionMeters) {
+        setGoal(MathUtil.clamp(positionMeters, 0.0, Constants.Elevator.PhysicalParameters.elevatorHeightMeters));
+    }
+
+    public double getPosition() {
+        return getMeasurement();
+    }
+
+    public double getGoalPosition() {
+        return this.getController().getGoal().position;
+    }
+
+    double lastVelocity = 0.0;
+    double lastTime = 0.0;
 
     @Override
     public void useOutput(double output, TrapezoidProfile.State setpoint) {
-        double ff = feedForward.calculate(setpoint.velocity, 0.0);
+        double dv = setpoint.velocity - lastVelocity;
+        double dt = Timer.getFPGATimestamp() - lastTime;
+        lastTime = Timer.getFPGATimestamp();
+
+        lastVelocity = setpoint.velocity;
+
+        double ff = feedForward.calculate(setpoint.velocity, dv / dt);
 
         if (isZeroed || Robot.isSimulation()) {
+            // Controller output voltage
             double op = ff + output;
-            // if (bottomLimit.isPressed() && (op < 0.0)) {
-            // elevatorMotorOne.setVoltage(0.0);
-            // elevatorMotorTwo.setVoltage(0.0);
-            // } else {
-            elevatorMotorOne.set(op / 12.0);
-            elevatorMotorTwo.set(op / 12.0);
-            // }
 
-            // elevatorMotorOne.setVoltage(2);
-            // elevatorMotorTwo.setVoltage(2);
+            elevatorMotorOne.setVoltage(op);
+            elevatorMotorTwo.setVoltage(op);
 
-            SmartDashboard.putNumber("Elevator Total Output", op / 12);
-            SmartDashboard.putNumber("Elevator PID Output", output / 12);
-            SmartDashboard.putNumber("Elevator FF Output", ff / 12);
-            SmartDashboard.putNumber("Current Elevator Target (profiled)", setpoint.position);
+            elevatorTargetP.append(setpoint.position);
+            elevatorTargetV.append(setpoint.velocity);
+
+            SmartDashboard.putNumber("Elevator/Current Position", getMeasurement());
+            SmartDashboard.putNumber("Elevator/Current Velocity", elevatorEncoderOne.getVelocity());
+
+            SmartDashboard.putNumber("Elevator/Target Position", setpoint.position);
+            SmartDashboard.putNumber("Elevator/Target Velocity", setpoint.velocity);
+
             if (Robot.isSimulation()) {
-                simulation.setInputVoltage(MathUtil.clamp((output + ff) * 12.0, -12.0, 12.0));
+                simulation.setInputVoltage(MathUtil.clamp((output + ff), -12.0, 12.0));
             }
         } else {
             // Move down a little bit to zero
@@ -138,7 +180,7 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
 
     @Override
     public double getMeasurement() {
-        return Robot.isSimulation() ? simulation.getPositionMeters() : elevatorEncoder.getPosition();
+        return Robot.isSimulation() ? simulation.getPositionMeters() : elevatorEncoderOne.getPosition();
     }
 
     @Override
@@ -146,29 +188,27 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
         // TODO Auto-generated method stub
 
         if ((bottomLimit.isPressed()) && (!isZeroed)) {
-            elevatorEncoder.setPosition(0.0);
+            elevatorEncoderOne.setPosition(0.0);
             setGoal(0.0);
             isZeroed = true;
         }
 
         super.periodic();
 
-        SmartDashboard.putNumber("Elevator One Output", elevatorMotorOne.getAppliedOutput());
-        SmartDashboard.putNumber("Elevator One GET Output", elevatorMotorOne.get());
+        elevatorP.append(getMeasurement());
+        elevatorV.append(elevatorEncoderOne.getVelocity());
+        elevatorOneOutput.append(elevatorMotorOne.getAppliedOutput());
+        elevatorTwoOutput.append(elevatorMotorTwo.getAppliedOutput());
+        elevatorOneCurrent.append(elevatorMotorOne.getOutputCurrent());
+        elevatorTwoCurrent.append(elevatorMotorTwo.getOutputCurrent());
+        this.elevatorMechanism
+                .setLength(getMeasurement() + Constants.Elevator.PhysicalParameters.elevatorCarriageHeightMeters / 2.0);
 
-        SmartDashboard.putNumber("Elevator Two Output", elevatorMotorTwo.getAppliedOutput());
-        SmartDashboard.putNumber("Elevator Two GET Output", elevatorMotorTwo.get());
-
-        SmartDashboard.putNumber("Current Elevator Position", getMeasurement());
-        SmartDashboard.putNumber("Goal Elevator Position", this.getController().getGoal().position);
-        SmartDashboard.putBoolean("Elevator Zeroed", isZeroed);
+        // SmartDashboard.putNumber("Current Elevator Position", getMeasurement());
+        // SmartDashboard.putNumber("Goal Elevator Position",
+        // this.getController().getGoal().position);
         SmartDashboard.putBoolean("Elevator Bottom Limit", bottomLimit.isPressed());
-
-        SmartDashboard.putNumber("Elevator motor 1 encoder", elevatorMotorOne.getEncoder().getPosition());
-        SmartDashboard.putNumber("Elevator motor 2 encoder", elevatorMotorTwo.getEncoder().getPosition());
-
-        SmartDashboard.putNumber("Elevator motor 1 current", elevatorMotorOne.getOutputCurrent());
-        SmartDashboard.putNumber("Elevator motor 1 output voltage", elevatorMotorOne.getBusVoltage());
+        SmartDashboard.putData("Elevator Mechanism", mechanism2D);
     }
 
     @Override
@@ -176,14 +216,7 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
         // TODO Auto-generated method stub
         super.simulationPeriodic();
 
-        // Next, we update it. The standard loop time is 20ms.
-
         simulation.update(0.020);
-
-        // Finally, we set our simulated encoder's readings and simulated battery
-        // voltage
-
-        // SimBattery estimates loaded battery voltages
 
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(simulation.getCurrentDrawAmps()));
     }

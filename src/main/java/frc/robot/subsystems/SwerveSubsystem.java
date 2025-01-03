@@ -22,6 +22,8 @@ import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
@@ -60,6 +62,13 @@ public class SwerveSubsystem extends SubsystemBase {
             SwerveModuleConstants.BL_ABSOLUTE_ENCODER_PORT, SwerveModuleConstants.BL_OFFSET_RADIANS,
             SwerveModuleConstants.BL_ABSOLUTE_ENCODER_REVERSED,
             SwerveModuleConstants.BL_MOTOR_REVERSED);
+
+    private DoubleLogEntry chassisAccelX;
+    private DoubleLogEntry chassisAccelY;
+    private DoubleLogEntry chassisAccelZ;
+    private DoubleLogEntry chassisRotX;
+    private DoubleLogEntry chassisRotY;
+    private DoubleLogEntry chassisRotZ;
 
     PowerDistribution pdh = new PowerDistribution(1, ModuleType.kRev);
     int[] pdh_channels = {
@@ -127,6 +136,13 @@ public class SwerveSubsystem extends SubsystemBase {
         );
 
         NamedCommands.registerCommand("namedCommand", new PrintCommand("Ran namedCommand"));
+
+        chassisAccelX = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/acceleration/x");
+        chassisAccelY = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/acceleration/y");
+        chassisAccelZ = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/acceleration/z");
+        chassisRotX = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/x");
+        chassisRotY = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/y");
+        chassisRotZ = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/z");
     }
 
     @Override
@@ -183,6 +199,13 @@ public class SwerveSubsystem extends SubsystemBase {
                 backLeft.getModuleState().angle.getDegrees() + 90, -backLeft.getModuleState().speedMetersPerSecond,
                 backRight.getModuleState().angle.getDegrees() + 90, -backRight.getModuleState().speedMetersPerSecond
         });
+
+        chassisAccelX.append(navX.getRawAccelX());
+        chassisAccelY.append(navX.getRawAccelY());
+        chassisAccelZ.append(navX.getRawAccelZ());
+        chassisRotX.append(navX.getRawGyroX());
+        chassisRotY.append(navX.getRawGyroY());
+        chassisRotZ.append(navX.getRawGyroZ());
     }
 
     public void zeroHeading() {

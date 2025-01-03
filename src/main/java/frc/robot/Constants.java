@@ -46,6 +46,11 @@ public final class Constants {
     public static final int OPERATOR_CONTROLLER_PORT = 2;
   }
 
+  public static class RobotConstants {
+    public static final double robotWidthMeters = Units.inchesToMeters(25.0);
+    public static final double robotLengthMeters = Units.inchesToMeters(25.0);
+  }
+
   public static final class FieldConstants {
     public static final double GRAVITY = 9.81;
     public static final double SPEAKER_HEIGHT = 2.05; // Meters
@@ -136,7 +141,7 @@ public final class Constants {
     public static final double TRACK_WIDTH = Units.inchesToMeters(19.75);
     public static final double WHEEL_BASE = Units.inchesToMeters(19.75);
     // TODO: Set this for FWERB V2
-    public static final Rotation2d NAVX_ANGLE_OFFSET = Rotation2d.fromDegrees(90);
+    public static final Rotation2d NAVX_ANGLE_OFFSET = Rotation2d.fromDegrees(-90);
     // TODO: I'm not going to touch this... but it seems important!
     public static final double DRIVE_BASE_RADIUS = Units.inchesToMeters(15);
 
@@ -158,7 +163,7 @@ public final class Constants {
   }
 
   public static class CommonConstants {
-    public static final boolean LOG_INTO_FILE_ENABLED = false;
+    public static final boolean LOG_INTO_FILE_ENABLED = true;
   }
 
   public static class Elevator {
@@ -167,18 +172,17 @@ public final class Constants {
 
     public static boolean elevatorOneInverted = true;
     public static boolean elevatorTwoInverted = false;
-    // public static boolean elevatorEncoderInverted = false;
 
     public static SparkLimitSwitch.Type bottomLimitMode = SparkLimitSwitch.Type.kNormallyOpen;
 
     public static double motorTurnsPerMeter = 39.44;
 
     public static class PID {
-      public static double kP = 7.0; // 9.0;
+      public static double kP = 20.0; // 9.0;
       public static double kI = 0.0;
-      public static double kD = 0.0; // 4.0;
-      public static double MAX_VELOCITY = 1.25;
-      public static double MAX_ACCELERATION = 5.0;
+      public static double kD = 0.5; // 4.0;
+      public static double MAX_VELOCITY = 2.8;
+      public static double MAX_ACCELERATION = 18.0;
     }
 
     // TODO: For the first testing, set these all to zero for safety reasons
@@ -186,16 +190,19 @@ public final class Constants {
     // we don't damage it.
     public static class Feedforward {
       public static double Ks = 0.0;
-      public static double Kv = 4.10;
-      public static double Ka = 0.01;
-      public static double Kg = 0.09;
+      public static double Kv = 4.0;
+      public static double Ka = 0.03;
+      public static double Kg = 0.1;
     }
 
     public static class PhysicalParameters {
-      public static double gearReduction = 9.0;
+      public static double gearReduction = 9.0 / 2.0;
       public static double driveRadiusMeters = 0.0182;
       public static double carriageMassKg = 1.5;
       public static double elevatorHeightMeters = Units.inchesToMeters(50.0);
+      public static double elevatorBottomFromFloorMeters = Units.inchesToMeters(12.0);
+      public static double elevatorCarriageHeightMeters = Units.inchesToMeters(6.0);
+      public static double elevatorForwardsFromRobotCenterMeters = Units.inchesToMeters(25.0 / 2);
       public static DCMotor simMotor = DCMotor.getNeoVortex(2);
     }
   }
