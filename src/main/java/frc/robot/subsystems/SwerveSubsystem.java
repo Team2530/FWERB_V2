@@ -39,6 +39,7 @@ import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.Constants.*;
 import frc.robot.LimelightHelpers.PoseEstimate;
+import frc.robot.RobotContainer;
 
 public class SwerveSubsystem extends SubsystemBase {
     SwerveModule frontLeft = new SwerveModule(SwerveModuleConstants.FL_STEER_ID, SwerveModuleConstants.FL_DRIVE_ID,
@@ -144,7 +145,7 @@ public class SwerveSubsystem extends SubsystemBase {
         // updateVisionOdometry();
 
         if (DriverStation.isTeleopEnabled()) {
-            updateMegaTagOdometry();
+            RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
         } else {
             updateVisionOdometry();
         }

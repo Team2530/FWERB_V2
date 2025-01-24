@@ -29,6 +29,9 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.*;
 
+import frc.robot.util.LimelightContainer;
+import frc.robot.subsystems.Limelight.LimelightType;
+
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a
@@ -39,6 +42,14 @@ import edu.wpi.first.wpilibj2.command.button.*;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
+
+    private static final Limelight LL_A = new Limelight(LimelightType.LL3, "limelight-a", true, true);
+    private static final Limelight LL_B = new Limelight(LimelightType.LL3, "limelight-b", true, true);
+
+    public static final LimelightContainer LLContainer = new LimelightContainer(LL_A, LL_B);
+
+
 
     private final CommandXboxController driverXbox = new CommandXboxController(
             ControllerConstants.DRIVER_CONTROLLER_PORT);
